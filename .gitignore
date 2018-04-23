@@ -6,3 +6,5 @@ docs/
 .* # Ignore all dotfiles...
 !.gitignore # except for .gitignore
 .idea
+*.log
+*.DS_STORE

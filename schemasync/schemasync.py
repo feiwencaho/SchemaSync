@@ -11,18 +11,17 @@ import utils
 import warnings
 
 __author__ = """
-Mitch Matuson
-Mustafa Ozgur
+vincent fei
 """
 __copyright__ = """
-Copyright 2009-2016 Mitch Matuson
-Copyright 2016 Mustafa Ozgur
+Copyright 2018 Vincent Fei
 """
 __version__ = "0.9.4"
 __license__ = "Apache 2.0"
 
 # supress MySQLdb DeprecationWarning in Python 2.6
 warnings.simplefilter("ignore", DeprecationWarning)
+import configparser
 
 try:
     import MySQLdb
@@ -120,15 +119,37 @@ def parse_cmd_line(fn):
                                 "Default is output directory. "
                                 "Log filename is schemasync.log"))
 
+        parser.add_option("--conf",
+                          dest="conf",
+                          help="set the source and target database in the file.")
+
         options, args = parser.parse_args(sys.argv[1:])
 
         if options.show_version:
             print APPLICATION_NAME, __version__
             return 0
 
-        if (not args) or (len(args) != 2):
-            parser.print_help()
-            return 0
+        if options.conf:
+            cp = configparser.ConfigParser()
+            cp.read(options.conf)
+            source_user = cp.get('source', 'user')
+            source_password = cp.get('source', 'password')
+            source_dbname = cp.get('source', 'database')
+            source_host = cp.get('source', 'host')
+            source_port = cp.get('source', 'port')
+            source_db = 'mysql://%s:%s@%s:%s/%s' % \
+                        (source_user, source_password, source_host, source_port, source_dbname)
+
+            target_user = cp.get('target', 'user')
+            target_password = cp.get('target', 'password')
+            target_dbname = cp.get('target', 'database')
+            target_host = cp.get('target', 'host')
+            target_port = cp.get('target', 'port')
+            target_db = 'mysql://%s:%s@%s:%s/%s' % \
+                        (target_user, target_password, target_host, target_port, target_dbname)
+            args = (source_db, target_db)
+            print 'sourcedb: ', source_db
+            print 'targetdb: ', target_db
 
         return fn(*args, **dict(version_filename=options.version_filename,
                                 output_directory=options.output_directory,

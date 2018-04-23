@@ -1,23 +1,34 @@
 #!/usr/bin/env python
-import ez_setup
+# -*- encoding:utf-8 -*-
 
-ez_setup.use_setuptools()
+from cx_Freeze import setup, Executable
+# ez_setup.use_setuptools()
 
-from setuptools import setup
+from schemasync import syncdb, utils
+
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), 'schemasync'))
+
+build_options = dict(
+    include_files=[],
+    includes=[],
+    packages=[],
+
+)
 
 setup(
     name='SchemaSync',
     version='0.9.4',
     description='A MySQL Schema Synchronization Utility',
-    author='Mitch Matuson, Mustafa Ozgur',
-    packages=['schemasync'],
+    author='Vincent Fei',
     install_requires=['SchemaObject >= 0.5.7'],
     entry_points={
         'console_scripts': [
             'schemasync = schemasync.schemasync:main',
         ]
     },
-
     keywords=["MySQL", "database", "schema", "migration", "SQL"],
 
     classifiers=[
@@ -33,10 +44,13 @@ setup(
         "Topic :: Software Development :: Code Generators",
         "Topic :: Utilities",
     ],
-
-    long_description="""\
-      Schema Sync will generate the SQL necessary to migrate the schema of a source database
-      to a target database (patch script), as well as a the SQL necessary to undo the changes
-      after you apply them (revert script).
-      """
+    options=dict(build_exe=build_options),
+    executables=[
+        Executable(
+            script='schemasync/schemasync.py',
+            # base="win32gui",
+            targetName='schemasync',  # 生成exe的名字
+            # icon="Test.ico"  # 生成exe的的图标
+        )
+    ]
 )
